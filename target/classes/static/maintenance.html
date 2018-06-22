@@ -1,0 +1,303 @@
+	<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>PRE-SR Dashboard</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/dashboard.css" rel="stylesheet">
+</head>
+<body ng-app="maintenanceAppMolude"
+	ng-controller="maintenanceController">
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a ng-click="goToPage(1)"
+						href="/maintenancePage?token={{token}}">Maintenance window</a>
+					</li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a ng-click="goToPage(2)"
+						href="/auditPage?token={{token}}">Home</a>
+					</li>
+				</ul>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Help</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="main">
+				<div class="row">
+					<div class="col-md-12 col-sm-12"
+						style="border: thin solid #dfdfdf; padding: 5px 20px 0 20px; border-radius: 3px;">
+						<form>
+							<div class="row">
+								<div class="col-sm-3">
+									<div class="form-group">
+										<label for="formType">Select By</label> <select id="formType"
+											class="form-control" ng-model="form.type"
+											ng-init="form.type='SumINFO'">
+											<option value="Window Date">Window Date</option>
+											<option value="SumINFO">SumInfoId</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-sm-3" ng-if="form.type == 'Window Date'">
+									<div class="form-group">
+										<label for="startDate">Start Date</label> <input
+											id="startDate" type="date" class="form-control"
+											ng-model="form.fromDate">
+									</div>
+								</div>
+								<div class="col-sm-3" ng-if="form.type == 'Window Date'">
+									<div class="form-group">
+										<label for="endDate">End Date</label> <input id="endDate"
+											type="date" class="form-control" ng-model="form.toDate">
+									</div>
+								</div>
+								<div class="col-sm-3" ng-if="form.type == 'SumINFO'">
+									<div class="form-group clear">
+										<label for="sumINFO">SumInfoId</label> <input id="sumINFO"
+											type="number" min="1" oninput="validity.valid||(value='');"
+											class="form-control" ng-model="form.sumINFO">
+									</div>
+								</div>
+								<div class="col-sm-3 text-right"
+									ng-class="(form.type == 'SumINFO') ? 'col-sm-offset-3' : ''">
+									<button type="submit" class="btn btn-primary clear"
+										ng-click="search(form.sumINFO,form.fromDate,form.toDate)"
+										style="margin-top: 25px;">Search</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="main"
+				ng-if="flag=='true'">
+				<h2 class="sub-header" ng-if="upcomingList.length>0">
+					<div class="row">
+						<div class="col-xs-4 text-left">Upcoming Window</div>
+					</div>
+				</h2>
+				<div class="table-responsive" ng-if="upcomingList.length>0">
+					<table align="center"
+						class="table table-striped tabletable table-bordered text-center">
+						<thead>
+							<tr>
+								<th class="text-center">Index</th>
+								<th class="text-center">Maintenance Id</th>
+								<th class="text-center">SumInfo</th>
+								<th class="text-center">Start Time</th>
+								<th class="text-center">Duration</th>
+								<th class="text-center">Effective Date</th>
+								<th class="text-center">Expiry Date</th>
+								<th class="text-center">Time Zone</th>
+								<!-- <th class="text-center">Row Created</th>
+								<th class="text-center">Row Last Updated</th> -->
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								dir-paginate="maintenanceInfo in upcomingList | itemsPerPage:5"
+								pagination-id="upcoming">
+								<td>{{$index+1}}.</td>
+								<td>{{maintenanceInfo.maintenanceScheduleId}}</td>
+								<td>{{maintenanceInfo.sumInfoId}}</td>
+								<td>{{maintenanceInfo.startTime}}</td>
+								<td>{{maintenanceInfo.duration}}</td>
+								<td>{{maintenanceInfo.effectiveDate}}</td>
+								<td>{{maintenanceInfo.expiryDate}}</td>
+								<td>{{maintenanceInfo.timeZone}}</td>
+								<!-- <td>{{maintenanceInfo.rowCreated}}</td>
+								<td>{{maintenanceInfo.rowLastUpdated}}</td> -->
+							</tr>
+						</tbody>
+					</table>
+					<dir-pagination-controls max-size="5" direction-links="true"
+						boundary-links="true" pagination-id="upcoming">
+					</dir-pagination-controls>
+				</div>
+				<h2 class="sub-header" ng-if="ongoingList.length>0">
+					<div class="row">
+						<div class="col-xs-4 text-left">Today's Window</div>
+					</div>
+				</h2>
+				<div class="table-responsive" ng-if="ongoingList.length>0">
+					<table
+						class="table table-striped table table table-bordered text-center">
+						<thead>
+							<tr>
+								<th class="text-center">Index</th>
+								<th class="text-center">Maintenance Id</th>
+								<th class="text-center">SumInfo</th>
+								<th class="text-center">Start Time</th>
+								<th class="text-center">Duration</th>
+								<th class="text-center">Effective Date</th>
+								<th class="text-center">Expiry Date</th>
+								<th class="text-center">Time Zone</th>
+								<!-- <th class="text-center">Row Created</th>
+								<th class="text-center">Row Last Updated</th> -->
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								dir-paginate="maintenanceInfo in ongoingList | itemsPerPage:5"
+								pagination-id="ongoing">
+								<td>{{$index+1}}.</td>
+								<td>{{maintenanceInfo.maintenanceScheduleId}}</td>
+								<td>{{maintenanceInfo.sumInfoId}}</td>
+								<td>{{maintenanceInfo.startTime}}</td>
+								<td>{{maintenanceInfo.duration}}</td>
+								<td>{{maintenanceInfo.effectiveDate}}</td>
+								<td>{{maintenanceInfo.expiryDate}}</td>
+								<td>{{maintenanceInfo.timeZone}}</td>
+								<!-- <td>{{maintenanceInfo.rowCreated}}</td>
+								<td>{{maintenanceInfo.rowLastUpdated}}</td> -->
+							</tr>
+						</tbody>
+					</table>
+					<dir-pagination-controls max-size="5" direction-links="true"
+						boundary-links="true" pagination-id="ongoing">
+					</dir-pagination-controls>
+				</div>
+
+				<h2 class="sub-header" ng-if="prevList.length>0">
+					<div class="row">
+						<div class="col-xs-4 text-left">Previous Window</div>
+
+					</div>
+				</h2>
+				<div class="table-responsive" ng-if="prevList.length>0">
+					<table
+						class="table table-striped table table table-bordered text-center">
+						<thead>
+							<tr>
+								<th class="text-center">Index</th>
+								<th class="text-center">Maintenance Id</th>
+								<th class="text-center">SumInfo</th>
+								<th class="text-center">Start Time</th>
+								<th class="text-center">Duration</th>
+								<th class="text-center">Effective Date</th>
+								<th class="text-center">Expiry Date</th>
+								<th class="text-center">Time Zone</th>
+								<!-- <th class="text-center">Row Created</th>
+								<th class="text-center">Row Last Updated</th> -->
+							</tr>
+						</thead>
+						<tbody>
+							<tr dir-paginate="maintenanceInfo in prevList | itemsPerPage:5"
+								pagination-id="previous">
+								<td>{{$index+1}}.</td>
+								<td>{{maintenanceInfo.maintenanceScheduleId}}</td>
+								<td>{{maintenanceInfo.sumInfoId}}</td>
+								<td>{{maintenanceInfo.startTime}}</td>
+								<td>{{maintenanceInfo.duration}}</td>
+								<td>{{maintenanceInfo.effectiveDate}}</td>
+								<td>{{maintenanceInfo.expiryDate}}</td>
+								<td>{{maintenanceInfo.timeZone}}</td>
+								<!-- <td>{{maintenanceInfo.rowCreated}}</td>
+								<td>{{maintenanceInfo.rowLastUpdated}}</td> -->
+							</tr>
+						</tbody>
+					</table>
+					<dir-pagination-controls max-size="5" direction-links="true"
+						boundary-links="true" pagination-id="previous">
+					</dir-pagination-controls>
+				</div>
+			</div>
+			<div class="main"
+				ng-if="flag=='false'">
+				
+				<h2 class="sub-header">
+					<div class="row">
+						<div class="col-xs-4 text-left">Maintenance Window</div>
+					</div>
+				</h2>
+				<div class="table-responsive">
+				<table
+					class="table table table-striped table table-bordered text-center">
+					<thead>
+						<tr>
+							<th class="text-center">Index</th>
+							<th class="text-center" ng-click="sort('maintenanceScheduleId')">Maintenance
+								Id <span class="glyphicon sort-icon"
+								ng-show="sortKey=='maintenanceScheduleId'"
+								ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+							</th>
+							<th class="text-center">SumInfo</th>
+							<th class="text-center">Start Time</th>
+							<th class="text-center">Duration</th>
+							<th class="text-center" ng-click="sort('effectiveDate')">Effective
+								Date <span class="glyphicon sort-icon"
+								ng-show="sortKey=='effectiveDate'"
+								ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+							</th>
+							</th>
+							<th class="text-center">Expiry Date</th>
+							<!-- <th class="text-center">Time Zone</th> -->
+							<!-- <th class="text-center">Row Created</th>
+								<th class="text-center">Row Last Updated</th> -->
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							dir-paginate="maintenanceInfo in list|orderBy:sortKey:reverse| itemsPerPage:10"
+							pagination-id="total"" >
+							<td>{{$index+1}}.</td>
+							<td>{{maintenanceInfo.maintenanceScheduleId}}</td>
+							<td>{{maintenanceInfo.sumInfoId}}</td>
+							<td ng-if="maintenanceInfo.cron">{{maintenanceInfo.cron}}</td>
+							<td ng-if="maintenanceInfo.startTime">{{maintenanceInfo.startTime}}</td>
+							<td>{{maintenanceInfo.duration}}</td>
+							<td>{{maintenanceInfo.effectiveDate| date:'dd-MM-yyyy'}}</td>
+							<td>{{maintenanceInfo.expiryDate| date:'dd-MM-yyyy'}}</td>
+							<!-- <td>{{maintenanceInfo.timeZone}}</td> -->
+							<!-- <td>{{maintenanceInfo.rowCreated}}</td>
+								<td>{{maintenanceInfo.rowLastUpdated}}</td> -->
+						</tr>
+					</tbody>
+				</table>
+				<dir-pagination-controls max-size="10" direction-links="true"
+					boundary-links="true" pagination-id="total">
+				</dir-pagination-controls>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+            ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script>
+		window.jQuery
+				|| document
+						.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')
+	</script>
+	<script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script type="text/javascript" src="js/maintenance.js"></script>
+	<script type="text/javascript" src="js/dirPagination.js"></script>
+	<!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+	<script src="js/holder.min.js"></script>
+</body>
+</html>

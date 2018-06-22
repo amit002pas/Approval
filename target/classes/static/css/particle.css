@@ -1,0 +1,11 @@
+border
+{
+	margin: 0;
+	padding: 0;
+	height: 50vh;
+}
+#particles-js
+{
+	height: 100%;
+	background: #262626;
+}
